@@ -2,18 +2,20 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Copy everything into container
-COPY . /app
-
+# Install Java for Spark
 RUN apt-get update && \
-    apt-get install -y openjdk-21-jre-headless && \
+    apt-get install -y openjdk-17-jre-headless && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-RUN pip install --no-cache-dir pyspark==3.5.1 boto3
+# Install PySpark + boto3
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy ETL script
+COPY bronze_layer.py /app/
 
-# Run correct python file
+# Run ETL
 CMD ["python", "bronze_layer.py"]
