@@ -1,3 +1,15 @@
+import sys
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
+  
+sc = SparkContext.getOrCreate()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
+
 from pyspark.sql import SparkSession
 
 # S3 paths
@@ -22,3 +34,4 @@ df_productions.write.mode("overwrite").parquet(prod_dest)
 
 # Stop Spark session
 spark.stop()
+
