@@ -1,8 +1,3 @@
-%idle_timeout 900
-%glue_version 5.0
-%worker_type G.1X
-%number_of_workers 2
-
 import sys
 from awsglue.transforms import *
 from awsglue.utils import getResolvedOptions
@@ -23,3 +18,4 @@ df_productions = spark.read.format('json').option('multiline', True).load(produc
 
 df_sales.write.format('parquet').mode('overwrite').save('s3://samir-test-demo-small-data-pipeline/datalake/sales.parquet')
 df_productions.write.format('parquet').mode('overwrite').save('s3://samir-test-demo-small-data-pipeline/datalake/productions.parquet')
+
