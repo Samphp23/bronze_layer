@@ -1,10 +1,13 @@
-from pyspark.sql import SparkSession
+from awsglue.transforms import *
+from awsglue.utils import getResolvedOptions
+from pyspark.context import SparkContext
+from awsglue.context import GlueContext
+from awsglue.job import Job
 
-spark = SparkSession.builder \
-    .appName("DataMigrationJob") \
-    .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem") \
-    .config("spark.hadoop.fs.s3a.aws.credentials.provider", "com.amazonaws.auth.DefaultAWSCredentialsProviderChain") \
-    .getOrCreate()
+sc = SparkContext.getOrCreate()
+glueContext = GlueContext(sc)
+spark = glueContext.spark_session
+job = Job(glueContext)
 
 # S3 paths
 sales_path = "s3://samir-test-demo-small-data-pipeline/datalake/sales.csv"
@@ -23,6 +26,7 @@ df_productions.write.mode("overwrite").parquet(prod_dest)
 
 # Stop Spark session
 spark.stop()
+
 
 
 
