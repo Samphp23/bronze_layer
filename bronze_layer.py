@@ -10,18 +10,11 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 job = Job(glueContext)
 
-from pyspark.sql import SparkSession
-
 # S3 paths
 sales_path = "s3://samir-test-demo-small-data-pipeline/datalake/sales.csv"
 production_path = "s3://samir-test-demo-small-data-pipeline/datalake/productions.json"
 sales_dest = "s3://samir-test-demo-small-data-pipeline/bronze_layer/sales_parquet/"
 prod_dest = "s3://samir-test-demo-small-data-pipeline/bronze_layer/productions_parquet/"
-
-# Initialize Spark session
-spark = SparkSession.builder \
-    .appName("DataMigrationJob") \
-    .getOrCreate()
 
 # Read CSV
 df_sales = spark.read.csv(sales_path, header=True, inferSchema=True, mode="PERMISSIVE")
@@ -34,4 +27,5 @@ df_productions.write.mode("overwrite").parquet(prod_dest)
 
 # Stop Spark session
 spark.stop()
+
 
