@@ -12,4 +12,5 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 RUN pip install --no-cache-dir pyspark==3.5.1 boto3
 
 COPY . /app
-CMD ["python", "main.py"]
+CMD ["python", "bronze_layer"]
+
