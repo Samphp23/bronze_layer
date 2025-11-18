@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# Install Java (required for Spark)
+# Install Java and dependencies
 RUN apt-get update && \
     apt-get install -y openjdk-11-jdk wget curl && \
     apt-get clean
@@ -8,21 +8,16 @@ RUN apt-get update && \
 ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 ENV PATH=$JAVA_HOME/bin:$PATH
 
-# Install Python dependencies
-RUN pip install pyspark==3.5.0 \
-    delta-spark==3.1.0 \
-    boto3 \
-    awscli \
-    psycopg2-binary
+# Install PySpark and Hadoop AWS connector
+RUN pip install pyspark==3.5.0 boto3
 
-# Optional: Install AWS Glue libraries (for GlueContext)
-RUN mkdir -p /opt/glue-libs && \
-    curl -o /opt/glue-libs/awsglue.zip https://aws-glue-etl-artifacts.s3.amazonaws.com/glue-3.0/python/awsglue.zip && \
-    unzip /opt/glue-libs/awsglue.zip -d /opt/glue-libs/
+# Add Hadoop AWS JARs for S3 support
+ENV SPARK_HOME=/opt/spark
+RUN mkdir -p $SPARK_HOME/jars && \
+    wget -P $SPARK_HOME/jars https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar && \
+    wget -P $SPARK_HOME/jars https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar
 
-ENV PYTHONPATH=/opt/glue-libs:$PYTHONPATH
-
-# Copy your PySpark script
+# Copy your script
 COPY bronze_layer.py /app/bronze_layer.py
 WORKDIR /app
 
