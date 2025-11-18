@@ -1,25 +1,23 @@
-FROM jupyter/pyspark-notebook:x86_64-ubuntu-22.04
+FROM openjdk:11-slim
 
-USER root
+# Install Python and dependencies
+RUN apt-get update && apt-get install -y python3 python3-pip curl && \
+    apt-get clean
 
-# Install boto3 safely (do NOT use system pip)
-RUN /opt/conda/bin/pip install boto3
+# Install PySpark
+RUN pip3 install pyspark==3.4.1
 
-# Add Hadoop AWS + AWS Java SDK in correct path
-RUN curl -L -o /usr/local/spark/jars/hadoop-aws.jar \
-    https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar && \
-    curl -L -o /usr/local/spark/jars/aws-java-sdk-bundle.jar \
-    https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar
+# Add Hadoop AWS libs for S3 support
+RUN curl -L -o /opt/hadoop-aws.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar && \
+    curl -L -o /opt/aws-java-sdk-bundle.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar
 
-# Use the Python that contains pyspark
-ENV PYSPARK_PYTHON=/opt/conda/bin/python
-ENV PYSPARK_DRIVER_PYTHON=/opt/conda/bin/python
+# Set Spark / Hadoop environment variables
+ENV PYSPARK_PYTHON=python3
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
-USER jovyan
+# Copy your code
+WORKDIR /app
+COPY bronze_layer.py .
 
-COPY bronze_layer.py /home/jovyan/bronze_layer.py
-
-WORKDIR /home/jovyan
-
-CMD ["/opt/conda/bin/python", "bronze_layer.py"]
-
+# Run script
+CMD ["python3", "bronze_layer.py"]
