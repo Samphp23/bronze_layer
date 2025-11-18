@@ -1,21 +1,17 @@
-FROM python:3.12-slim
+# Dockerfile
+FROM python:3.9-slim
 
-WORKDIR /app
-
-# Install Java for Spark
+# Install Java and required system packages for PySpark
 RUN apt-get update && \
-    apt-get install -y openjdk-17-jre-headless && \
+    apt-get install -y openjdk-17-jre-headless curl build-essential && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
+# Install PySpark (choose version compatible with Java/Python)
+RUN pip install --no-cache-dir pyspark==3.3.2
 
-# Install PySpark + boto3
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy your Spark app
+WORKDIR /app
+COPY bronze_layer.py /app/bronze_layer.py
 
-# Copy ETL script
-COPY bronze_layer.py /app/
-
-# Run ETL
+# Default command runs your script (you can override to get pyspark shell)
 CMD ["python", "bronze_layer.py"]
